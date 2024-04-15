@@ -1,0 +1,146 @@
+#Veri setini kendimiz oluşturarak keşifsel veri analizi yapıyoruz.
+set.seed(123) 
+n <- 50 
+x1 <- rnorm(n, mean = 5, sd = 2) # Bağımsız değişken 1
+x2 <- rnorm(n, mean = 3, sd = 1.5) # Bağımsız değişken 2
+x3 <- rnorm(n, mean = 2, sd = 1) # Bağımsız değişken 3
+x4 <- rnorm(n, mean = 6, sd = 2.5) # Bağımsız değişken 4
+x5 <- rnorm(n, mean = 10, sd = 2) # Bağımsız değişken 5
+y <- 2 + 3*x1 - 2*x2 + 1.5*x3 + 2.5*x4 - 1.4*x5 + rnorm(n, mean = 0, sd = 3) # Bağımlı değişken
+
+
+data <- data.frame(y, x1, x2, x3, x4, x5)
+
+head(data)
+dim(data)
+names(data)
+str(data)
+summary(data)
+
+#-Faktörel ve sayısal değişkene dönüştürme
+set.seed(123) 
+n <- 50 
+x1_a <- rnorm(n, mean = 5, sd = 2)
+x2_a <- rnorm(n, mean = 3, sd = 1.5)
+x3_a <- rnorm(n, mean = 2, sd = 1)
+y_a <- rnorm(n, mean = 2 + 3*x1 - 2*x2 +1.5*x3,sd = 3)
+
+x1_a_factor <- as.factor(x1_a)
+x2_a_factor <- as.factor(x2_a)
+x3_a_numeric <- as.numeric(x3_a)
+
+str(x1_a_factor)
+str(x2_a_factor)
+str(x3_a_numeric)
+
+#-Eksik verilerin tespiti
+set.seed(123) 
+n <- 50 
+x1_md <- rnorm(n, mean = 5, sd = 2)
+x2_md <- rnorm(n, mean = 3, sd = 1.5)
+x3_md <- rnorm(n, mean = 2, sd = 1)
+y_md <- rnorm(n, mean = 2 + 3*x1 - 2*x2 + 1.5*x3, sd = 3)
+
+
+#
+is_na_x1 <- is.na(x1_md)
+is_na_x2 <- is.na(x2_md)
+is_na_x3 <- is.na(x3_md)
+
+#Eksik verileri mean ile doldurma
+mean_x1_md <-mean(x1, na.rm = TRUE)
+x1_filled <- ifelse(is.na(x1_md),
+                    mean_x1,x1)
+
+#Eksik verileri önceki değerle doldurma
+x2_filled <- na.locf(x2_md)
+
+
+# Eksik verileri medyanla doldurma
+median_y_md <- quantile(y_md, 0.5,na.rm = TRUE)
+y_filled <- ifelse(is.na(y_md), 
+                   median_y_md, y_md)
+
+#Aykırı değerlerin tespiti
+#Uniform dağılımlı bir veri seti oluşturdum.
+data2 <- runif(100, min = 1, max = 5)
+hist(data, main = "Uniform Dağılım", xlab = "Değerler", ylab = "Frekans")
+boxplot(data2)
+sort(data2)
+
+# Z-puanı hesaplama
+z_scores <- scale(data2)
+
+# Aykırı değerleri belirleme
+outliers <- abs(z_scores) > 3 #sonuca göre aykırı değer yok.
+
+#-
+q1 <- quantile(data2,0.25)
+q3 <- quantile(data2,0.75)
+
+IQR <- q3 - q1
+lower_bound <- q1 - 1.5 * IQR
+upper_bound <- q3 + 1.5 * IQR
+
+outliers <- data2 <- lower_bound | data2 >upper_bound
+
+#Dağılımları keşfetme
+#beta dağılımlı bir veri seti oluşturdum.
+data3 <- rbeta(1000, shape1 = 2,  shape2 = 2)
+hist(data3)
+boxplot(data3)
+qqnorm(data3)
+qqline(data3)
+summary(data3)
+
+#korelasyon
+set.seed(123)
+x <- rnorm(50) # Bağımsız değişken
+y <- 3*x + rnorm(50, mean = 1, sd = 1.5) # Bağımlı değişken
+
+correlation <- cor(x,y)
+print(correlation)
+
+#multicollinearity
+set.seed(123)
+x1 <- rnorm(50) # Bağımsız değişken 1
+x2 <- rnorm(50) # Bağımsız değişken 2
+x3 <- rnorm(50) # Bağımsız değişken 3
+y <- 3*x1 - 2*x2 + 1.5*x3 + rnorm(50, mean = 1, sd = 1.5) # Bağımlı değişken
+
+#doğrusal regresron modeli
+model <- lm(y ~ x1 + x2 + x3)
+summary(model)
+
+#Korelasyon matrisi
+correlation_matrix <- cor(data.frame(x1, x2, x3))
+print(correlation_matrix)
+
+library(corrplot)
+
+corrplot(correlation_matrix, method = "color")
+
+par(mfrow=c(1,3)) 
+plot(x1, y, main = "x1 vs. y", xlab = "x1", ylab = "y", col = "green", pch = 8)
+plot(x2, y, main = "x2 vs. y", xlab = "x2", ylab = "y", col = "red", pch = 8)
+plot(x3, y, main = "x3 vs. y", xlab = "x3", ylab = "y", col = "blue", pch = 8)
+
+
+#Veri standartlaştırma
+
+set.seed(123)
+x1 <- rnorm(50) # Bağımsız değişken 1
+x2 <- rnorm(50) # Bağımsız değişken 2
+x3 <- rnorm(50) # Bağımsız değişken 3
+y <- 3*x1 - 2*x2 + 1.5*x3 + rnorm(50, mean = 1, sd = 1.5) # Bağımlı değişken
+
+
+x1_standardized <- scale(x1)
+x2_standardized <- scale(x2)
+x3_standardized <- scale(x3)
+y_standardized <- scale(y)
+
+summary(x1_standardized)
+summary(x2_standardized)
+summary(x3_standardized)
+summary(y_standardized)
